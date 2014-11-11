@@ -1,7 +1,8 @@
 package = "socks5"
 version = "dev"
 source = {
-   url = "..." -- We don't have one yet
+    url = 'git://github.com/starius/lua-resty-socks5',
+    tag = '1.0',
 }
 description = {
     summary =

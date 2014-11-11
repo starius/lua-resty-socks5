@@ -1,4 +1,42 @@
 lua-resty-socks5
 ================
 
-Lua SOCKS5 client for the ngx_lua based on the cosocket API
+Lua SOCKS5 client for the `ngx_lua` based on the cosocket API
+
+This module contains the following functions:
+
+ * `socks5.auth(cosocket)` - authenticate to SOCKS5
+    server (method "no authentication" is used).
+    Cosocket must be connected to SOCKS5 server
+ * `socks5.connect(cosocket, host, port)` - tell
+    SOCKS5 server to connect to target host:port.
+    Host must be domain name
+ * `socks5.handle_request(socks5host, socks5port,
+    request_changer?, response_changer?)` -
+    creates cosocket, authenticates to SOCKS5 server
+    (defined by socks5host, socks5port),
+    connects to target host:port (defined in ngx.req),
+    receive request headers and body, send them
+    through SOCKS5 server to target,
+    then receive response headers and body,
+    send them to client.
+
+    Optional function `request_changer` is applied to
+    request headers before sending them to target.
+    Optional function `response_changer` is applied to
+    response headers before sending them to client.
+
+How to use this module to proxy all requests through Tor:
+
+```nginx
+server {
+    listen 80;
+    server_name ip4.me; # must be in request header
+    location / {
+        default_type text/html;
+        content_by_lua '
+        require("socks5").handle_request("127.0.0.1", 9050)
+        ';
+    }
+}
+```

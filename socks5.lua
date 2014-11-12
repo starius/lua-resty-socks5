@@ -97,7 +97,12 @@ socks5.handle_request = function(socks5host, socks5port,
         sosocket:send(clbody)
     end
     -- read response
-    local soheader = sosocket:receiveuntil('\r\n\r\n')()
+    local soheader, message =
+        sosocket:receiveuntil('\r\n\r\n')()
+    if not soheader then
+        ngx.say('No headers received from target: ' .. message)
+        return
+    end
     local sobody_length = soheader:match(
         'Content%-Length%: (%d+)')
     if response_changer then

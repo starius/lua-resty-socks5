@@ -71,7 +71,7 @@ socks5.handle_request = function(socks5host, socks5port,
     local sosocket = ngx.socket.connect(socks5host, socks5port)
     local status, message = socks5.auth(sosocket)
     if not status then
-        ngx.print('Error: ' .. message)
+        ngx.say('Error: ' .. message)
         return
     end
     local target_host = ngx.req.get_headers()['Host']
@@ -82,7 +82,7 @@ socks5.handle_request = function(socks5host, socks5port,
     local status, message = socks5.connect(sosocket,
         target_host, target_port)
     if not status then
-        ngx.print('Error: ' .. message)
+        ngx.say('Error: ' .. message)
         return
     end
     -- read request

@@ -141,7 +141,7 @@ socks5.handle_onion2web = function(onion_replacement,
         torport = 9050
     end
     local repl = hidden_base .. onion_replacement
-    local host = ngx.get_headers()['Host']
+    local host = ngx.req.get_headers()['Host']
     if not host:match('^' .. repl .. '$') then
         ngx.say('Bad domain: ' .. host)
         return

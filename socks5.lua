@@ -140,11 +140,17 @@ socks5.handle_onion2web = function(onion_replacement,
     if not torport then
         torport = 9050
     end
+    local repl = hidden_base .. onion_replacement
+    local host = ngx.get_headers()['Host']
+    if not host:match('^' .. repl .. '$') then
+        ngx.say('Bad domain: ' .. host)
+        return
+    end
     socks5.handle_request(torhost, torport,
     function(clheader)
         return clheader
         :gsub("HTTP/1.1(%c+)", "HTTP/1.0%1")
-        :gsub(hidden_base .. onion_replacement, "%1.onion")
+        :gsub(repl, "%1.onion")
         :gsub("Connection: keep%-alive", "Connection: close")
         :gsub("Accept%-Encoding: [%w%p ]+%c+", "")
     end,

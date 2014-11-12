@@ -129,5 +129,28 @@ socks5.handle_request = function(socks5host, socks5port,
     sosocket:close()
 end
 
+local hidden_base = "(" .. string.rep("%w", 16) .. ")"
+local hidden_onion = hidden_base .. '%.onion'
+
+socks5.handle_onion2web = function(onion_replacement,
+        torhost, torport)
+    if not torhost then
+        torhost = '127.0.0.1'
+    end
+    if not torport then
+        torport = 9050
+    end
+    socks5.handle_request(torhost, torport,
+    function(clheader)
+        return clheader
+        :gsub("HTTP/1.1(%c+)", "HTTP/1.0%1")
+        :gsub(hidden_base .. onion_replacement, "%1.onion")
+    end,
+    function(soheader)
+        return soheader
+        :gsub(hidden_onion, "%1" .. onion_replacement)
+    end)
+end
+
 return socks5
 

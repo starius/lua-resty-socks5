@@ -145,6 +145,8 @@ socks5.handle_onion2web = function(onion_replacement,
         return clheader
         :gsub("HTTP/1.1(%c+)", "HTTP/1.0%1")
         :gsub(hidden_base .. onion_replacement, "%1.onion")
+        :gsub("Connection: keep%-alive", "Connection: close")
+        :gsub("Accept%-Encoding: [%w%p ]+%c+", "")
     end,
     function(soheader)
         return soheader

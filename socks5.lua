@@ -94,6 +94,9 @@ socks5.handle_request = function(socks5host, socks5port,
     ngx.req.read_body()
     local clbody = ngx.req.get_body_data()
     if body then
+        if request_changer then
+            clbody = request_changer(clbody)
+        end
         sosocket:send(clbody)
     end
     -- read response
@@ -109,11 +112,19 @@ socks5.handle_request = function(socks5host, socks5port,
         soheader = response_changer(soheader)
     end
     local clsocket = ngx.req.socket(true)
-    clsocket:send(soheader .. '\r\n\r\n')
-    local sobody = sosocket:receive(sobody_length or '*a')
-    if sobody then
-        clsocket:send(sobody)
+    local sobody = sosocket:receive(sobody_length or '*a') or ''
+    if response_changer then
+        sobody = response_changer(sobody)
     end
+    if soheader:find('Content%-Length%:') then
+        soheader = soheader:gsub('Content%-Length%: %d+',
+            'Content-Length: ' .. #sobody)
+    else
+        soheader = soheader ..
+            '\r\nContent-Length: ' .. #sobody
+    end
+    clsocket:send(soheader .. '\r\n\r\n')
+    clsocket:send(sobody)
     -- close
     sosocket:close()
 end

@@ -22,9 +22,9 @@ This module contains the following functions:
     send them to client.
 
     Optional function `request_changer` is applied to
-    request headers before sending them to target.
+    request before sending it to target.
     Optional function `response_changer` is applied to
-    response headers before sending them to client.
+    response before sending it to client.
 
 How to use this module to proxy all requests through Tor:
 

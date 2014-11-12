@@ -93,7 +93,7 @@ socks5.handle_request = function(socks5host, socks5port,
     sosocket:send(clheader)
     ngx.req.read_body()
     local clbody = ngx.req.get_body_data()
-    if body then
+    if clbody then
         if request_changer then
             clbody = request_changer(clbody)
         end

@@ -54,10 +54,12 @@ socks5.connect = function(cosocket, host, port)
     if addr_type == char(DOMAIN_NAME) then
         local addr_length = addr_type:byte(1)
         cosocket:receive(addr_length)
-    elseif addr_type == IPv4 then
+    elseif addr_type == char(IPv4) then
         cosocket:receive(4)
-    elseif addr_type == IPv6 then
+    elseif addr_type == char(IPv6) then
         cosocket:receive(16)
+    else
+        return nil, 'Bad address type: ' .. string.byte(addr_type)
     end
     -- pop port
     cosocket:receive(2)

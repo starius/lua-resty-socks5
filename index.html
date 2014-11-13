@@ -4,7 +4,7 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Lua-resty-socks5 : Access .onion sites without Tor Browser">
+    <meta name="description" content="Lua-resty-socks5 : Lua SOCKS5 client for the ngx_lua based on the cosocket AP">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
@@ -19,7 +19,7 @@
           <a id="forkme_banner" href="https://github.com/starius/lua-resty-socks5">View on GitHub</a>
 
           <h1 id="project_title">Lua-resty-socks5</h1>
-          <h2 id="project_tagline">Access .onion sites without Tor Browser</h2>
+          <h2 id="project_tagline">Lua SOCKS5 client for the ngx_lua based on the cosocket AP</h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/starius/lua-resty-socks5/zipball/master">Download this project as a .zip file</a>
@@ -31,20 +31,47 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p>This site is reverse proxy for
-<a href="https://torproject.org/">Tor</a>'s
-<a href="https://www.torproject.org/docs/hidden-services.html.en">hidden services</a>.</p>
+        <p>This module contains the following functions:</p>
 
-<p>To access hidden service using onion.gq,
-append <code>.gq</code> to its name.
-Example: access hidden service
-<a href="http://kpvzxxbbraaigawj.onion">kpvzxxbbraaigawj.onion</a> as
-<a href="http://kpvzxxbbraaigawj.onion.gq">kpvzxxbbraaigawj.onion.gq</a>.</p>
+<ul>
+<li>
+<code>socks5.auth(cosocket)</code> - authenticate to SOCKS5
+server (method "no authentication" is used).
+Cosocket must be connected to SOCKS5 server</li>
+<li>
+<code>socks5.connect(cosocket, host, port)</code> - tell
+SOCKS5 server to connect to target host:port.
+Host must be domain name</li>
+<li>
+<p><code>socks5.handle_request(socks5host, socks5port,
+request_changer?, response_changer?)</code> -
+creates cosocket, authenticates to SOCKS5 server
+(defined by socks5host, socks5port),
+connects to target host:port (defined in ngx.req),
+receive request headers and body, send them
+through SOCKS5 server to target,
+then receive response headers and body,
+send them to client.</p>
 
-<p>This machine does not host or contain any illegal content.
-Network infrastructure maintainers are
-not liable for the type of content that passes
-over their equipment.</p>
+<p>Optional function <code>request_changer</code> is applied to
+request before sending it to target.
+Optional function <code>response_changer</code> is applied to
+response before sending it to client.</p>
+</li>
+</ul>
+
+<p>How to use this module to proxy all requests through Tor:</p>
+
+<div class="highlight highlight-nginx"><pre><span class="pl-s">server</span> {
+    <span class="pl-pdv"><span class="pl-k">listen</span> <span class="pl-s1">80</span>;</span>
+    <span class="pl-pdv"><span class="pl-k">server_name</span> ip4.me;</span> <span class="pl-c"># must be in request header</span><span class="pl-pdv"></span>
+<span class="pl-pdv">    location / {</span>
+<span class="pl-pdv">        default_type text/html;</span>
+        <span class="pl-pdv">content_by_lua <span class="pl-s1">'</span></span>
+<span class="pl-pdv"><span class="pl-s1">        require("socks5").handle_request("127.0.0.1", 9050)</span></span>
+<span class="pl-pdv"><span class="pl-s1">        '</span>;</span>
+    }
+}</pre></div>
       </section>
     </div>
 

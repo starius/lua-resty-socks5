@@ -26,21 +26,16 @@ This module contains the following functions:
     Optional function `response_changer` is applied to
     response before sending it to client.
 
- * `socks5.handle_onion2web(onion_replacement,
-    torhost='127.0.0.1', torport=9050)` -
-    accept request to onion2web site.
-
-How to use this module to forward requests from
-`xxx.onion.gq` to `xxx.onion`:
+How to use this module to proxy all requests through Tor:
 
 ```nginx
 server {
     listen 80;
-    server_name *.onion.gq;
+    server_name ip4.me; # must be in request header
     location / {
         default_type text/html;
         content_by_lua '
-            require("socks5").handle_onion2web(".onion.gq");
+        require("socks5").handle_request("127.0.0.1", 9050)
         ';
     }
 }

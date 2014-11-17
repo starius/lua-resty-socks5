@@ -3,6 +3,11 @@ lua-resty-socks5
 
 Lua SOCKS5 client for the `ngx_lua` based on the cosocket API
 
+Related project:
+[onion2web](https://github.com/starius/onion2web).
+
+[Paper](http://habrahabr.ru/post/243055/) (in Russian).
+
 This module contains the following functions:
 
  * `socks5.auth(cosocket)` - authenticate to SOCKS5

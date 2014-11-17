@@ -8,6 +8,16 @@ Related project:
 
 [Paper](http://habrahabr.ru/post/243055/) (in Russian).
 
+Installation
+------------
+
+```bash
+$ sudo luarocks install socks5
+```
+
+Reference
+---------
+
 This module contains the following functions:
 
  * `socks5.auth(cosocket)` - authenticate to SOCKS5

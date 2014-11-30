@@ -1,3 +1,5 @@
+local ngx = require('ngx')
+
 local socks5 = {}
 
 local char = string.char

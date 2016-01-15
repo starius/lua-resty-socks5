@@ -71,21 +71,25 @@ end
 socks5.handle_request = function(socks5host, socks5port,
         request_changer, response_changer)
     local sosocket = ngx.socket.connect(socks5host, socks5port)
-    local status, message = socks5.auth(sosocket)
-    if not status then
-        ngx.say('Error: ' .. message)
-        return
+    do
+        local status, message = socks5.auth(sosocket)
+        if not status then
+            ngx.say('Error: ' .. message)
+            return
+        end
     end
     local target_host = ngx.req.get_headers()['Host']
     if request_changer then
         target_host = request_changer(target_host)
     end
     local target_port = 80
-    local status, message = socks5.connect(sosocket,
-        target_host, target_port)
-    if not status then
-        ngx.say('Error: ' .. message)
-        return
+    do
+        local status, message = socks5.connect(sosocket,
+            target_host, target_port)
+        if not status then
+            ngx.say('Error: ' .. message)
+            return
+        end
     end
     -- read request
     local clheader = ngx.req.raw_header()

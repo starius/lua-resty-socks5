@@ -26,6 +26,8 @@ local CONN_ERRORS = {
     [0x08] = 'address type not supported',
 }
 
+local CHUNK_SIZE = 1024
+
 -- authentication to socks5 server
 socks5.auth = function(cosocket)
     cosocket:send(char(SOCKS5, NUMBER_OF_AUTH_METHODS,
@@ -69,7 +71,7 @@ socks5.connect = function(cosocket, host, port)
 end
 
 socks5.handle_request = function(socks5host, socks5port,
-        request_changer, response_changer)
+        request_changer, response_changer, change_only_html)
     local sosocket = ngx.socket.connect(socks5host, socks5port)
     do
         local status, message = socks5.auth(sosocket)
@@ -114,23 +116,36 @@ socks5.handle_request = function(socks5host, socks5port,
     end
     local sobody_length = soheader:match(
         'Content%-Length%: (%d+)')
-    if response_changer then
-        soheader = response_changer(soheader)
-    end
+    local is_html = soheader:match('Content%-Type: text/html')
+    local change = is_html or not change_only_html
     local clsocket = ngx.req.socket(true)
-    local sobody = sosocket:receive(sobody_length or '*a') or ''
-    if response_changer then
+    if response_changer and change then
+        -- read whole body
+        local sobody = sosocket:receive(sobody_length or '*a') or ''
         sobody = response_changer(sobody)
-    end
-    if soheader:find('Content%-Length%:') then
-        soheader = soheader:gsub('Content%-Length%: %d+',
-            'Content-Length: ' .. #sobody)
+        soheader = response_changer(soheader)
+        if soheader:find('Content%-Length%:') then
+            soheader = soheader:gsub('Content%-Length%: %d+',
+                'Content-Length: ' .. #sobody)
+        else
+            soheader = soheader ..
+                '\r\nContent-Length: ' .. #sobody
+        end
+        clsocket:send(soheader .. '\r\n\r\n' .. sobody)
     else
-        soheader = soheader ..
-            '\r\nContent-Length: ' .. #sobody
+        -- stream
+        clsocket:send(soheader .. '\r\n\r\n')
+        while true do
+            local sobody = sosocket:receive(CHUNK_SIZE)
+            if not sobody then
+                break
+            end
+            local bytes = clsocket:send(sobody)
+            if not bytes then
+                break
+            end
+        end
     end
-    clsocket:send(soheader .. '\r\n\r\n')
-    clsocket:send(sobody)
     -- close
     sosocket:close()
 end

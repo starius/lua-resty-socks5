@@ -27,7 +27,7 @@ This module contains the following functions:
     SOCKS5 server to connect to target host:port.
     Host must be domain name
  * `socks5.handle_request(socks5host, socks5port,
-    request_changer?, response_changer?)` -
+    request_changer?, response_changer?, change_only_html?)` -
     creates cosocket, authenticates to SOCKS5 server
     (defined by socks5host, socks5port),
     connects to target host:port (defined in ngx.req),
@@ -40,6 +40,18 @@ This module contains the following functions:
     request before sending it to target.
     Optional function `response_changer` is applied to
     response before sending it to client.
+
+    The proxy can operate in two modes:
+
+      * whole-page: read whole HTTP response and then
+        send it to the client;
+      * streaming: read response in small chunks.
+
+    If `response_changer` is not used, streaming mode
+    is used. If `response_changer` is used and
+    `change_only_html` is truthy, then whole-page
+    is used for HTML pages and streaming is used
+    otherwise.
 
 How to use this module to proxy all requests through Tor:
 
